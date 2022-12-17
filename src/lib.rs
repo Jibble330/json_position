@@ -201,15 +201,15 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let json = "[null, 9, {\"field1\": \"b\", \"field2\": [null, null, 87, 4], \"field3\": \"file.txt\"}]";
+        let json = "[9, {\"field1\": \"b\", \"field2\": [null, null, 87, 4], \"field3\": \"file.txt\"}]";
         
         // Tests regular path
         let vec_path = path(json, json.find("87").unwrap()).expect("Invalid JSON");
-        assert_eq!(vec_path, vec![Index::Array(2), Index::Object(String::from("field2")), Index::Array(2)]);
+        assert_eq!(vec_path, vec![Index::Array(1), Index::Object(String::from("field2")), Index::Array(2)]);
 
         // Tests dotted path
         let dotted = dot_path(json, json.find("87").unwrap()).expect("Invalid JSON");
-        assert_eq!(dotted, "$.2.field2.2");
+        assert_eq!(dotted, "$.1.field2.2");
 
         // Tests out of bounds 
         assert_eq!(path(json, 1000).unwrap(), vec![]);
