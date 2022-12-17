@@ -6,7 +6,7 @@
 //! ```
 //! use json_position::dot_path;
 //! 
-//! let json = "[9, {\"name\": \"b\", \"fields\": [null, null, 87, 4], \"path\": \"file.txt\"}]";
+//! let json = r#"[9, {"name": "b", "fields": [null, null, 87, 4], "path": "file.txt"}]"#;
 //! let position = json.find("87").unwrap();
 //! 
 //! let dotted = dot_path(json, position).expect("Invalid JSON");
@@ -72,7 +72,7 @@ fn substring(str: &Vec<char>, start: usize, end: usize) -> String {
 /// ```
 /// use json_position::{path, Index};
 /// 
-/// let json = "[null, 9, {\"a\": \"b\"}]";
+/// let json = r#"[null, 9, {"a": "b"}]"#;
 /// 
 /// let vec_path = path(json, json.find("b").unwrap()).expect("Invalid JSON");
 /// assert_eq!(vec_path, vec![Index::Array(2), Index::Object(String::from("a"))]);
@@ -165,7 +165,7 @@ pub fn path(text: &str, offset: usize) -> Result<Vec<Index>, oxidized_json_check
 /// ```
 /// use json_position::{dot_path};
 ///
-/// let json = "[null, 9, {\"a\": \"b\"}]";
+/// let json = r#"[null, 9, {"a": "b"}]"#;
 /// 
 /// let path = dot_path(json, json.find("b").unwrap()).expect("Invalid JSON");
 /// assert_eq!(path, "$.2.a");
@@ -201,7 +201,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let json = "[9, {\"field1\": \"b\", \"field2\": [null, null, 87, 4], \"field3\": \"file.txt\"}]";
+        let json = r#"[9, {"field1": "b", "field2": [null, null, 87, 4], "field3": "file.txt"}]"#;
         
         // Tests regular path
         let vec_path = path(json, json.find("87").unwrap()).expect("Invalid JSON");
