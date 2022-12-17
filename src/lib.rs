@@ -10,7 +10,7 @@
 //! let position = json.find("87").unwrap();
 //! 
 //! let dotted = dot_path(json, position).expect("Invalid JSON");
-//! assert_eq!(dotted, "$.1.field2.2");
+//! assert_eq!(dotted, "$.1.fields.2");
 //! ```
 
 extern crate oxidized_json_checker;
