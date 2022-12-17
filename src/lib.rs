@@ -1,5 +1,21 @@
+//! Json Position is json library for finding the path to json at an index in the original string.
+//! Similar to extensions in most IDEs to get path to cursor position.
+//! 
+//! # Examples
+//! 
+//! ```
+//! use json_position::dot_path;
+//! 
+//! let json = "[9, {\"name\": \"b\", \"fields\": [null, null, 87, 4], \"path\": \"file.txt\"}]";
+//! let position = json.find("87").unwrap();
+//! 
+//! let dotted = dot_path(json, position).expect("Invalid JSON");
+//! assert_eq!(dotted, "$.1.field2.2");
+//! ```
+
 extern crate oxidized_json_checker;
 
+/// Index or key into an array or object
 #[derive(Debug, PartialEq, Eq)]
 pub enum Index {
     Array(usize),
@@ -11,6 +27,15 @@ impl Index {
         if let Index::Array(ref mut i) = self {
             *i += 1;
         }
+    }
+}
+
+impl std::fmt::Display for Index {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self {
+            Index::Array(i) => i.to_string(),
+            Index::Object(key) => key.to_owned()
+        })
     }
 }
 
@@ -40,15 +65,24 @@ fn substring(str: &Vec<char>, start: usize, end: usize) -> String {
     str.iter().skip(start).take(end-start).collect()
 }
 
-/// Returns the path of the position in a human readable format usable by most JsonPath crates
+/// Constructs the path to an index in a raw json string.
 ///
 /// # Examples
 /// 
 /// ```
-/// use json_position::{dot_path, Index};
-///
-/// let json = "[null, 9, {\"a\": \"b\"}]".to_owned();
-/// assert_eq!(path(json, json.find("b")), vec![Index::Array(2), Index::Object("a".to_owned())])
+/// use json_position::{path, Index};
+/// 
+/// let json = "[null, 9, {\"a\": \"b\"}]";
+/// 
+/// let vec_path = path(json, json.find("b").unwrap()).expect("Invalid JSON");
+/// assert_eq!(vec_path, vec![Index::Array(2), Index::Object(String::from("a"))]);
+/// ```
+/// 
+/// # Errors
+/// 
+/// Returns [`oxidized_json_checker::Error`] if the input json is invalid.
+/// 
+/// [`oxidized_json_checker::Error`]: https://docs.rs/oxidized-json-checker/0.3.2/oxidized_json_checker/enum.Error.html
 pub fn path(text: &str, offset: usize) -> Result<Vec<Index>, oxidized_json_checker::Error> {
     oxidized_json_checker::validate_str(&text)?;
 
@@ -60,7 +94,7 @@ pub fn path(text: &str, offset: usize) -> Result<Vec<Index>, oxidized_json_check
     
     let chars: Vec<char> = text.chars().collect();
 
-    while pos < offset {
+    while pos < offset && pos < chars.len() {
         let start_pos = pos;
         match chars[pos] {
             '"' => {
@@ -72,11 +106,12 @@ pub fn path(text: &str, offset: usize) -> Result<Vec<Index>, oxidized_json_check
                         if *last == Current::Object && in_key {
                             path.push(Index::Object(key));
                             in_key = false;
-                            pos += i;
+                            pos = i;
                         }
                     }
                     None => {}
                 }
+                
             }
             '{' => {
                 current.push(Current::Object);
@@ -98,7 +133,10 @@ pub fn path(text: &str, offset: usize) -> Result<Vec<Index>, oxidized_json_check
                 match current.last() {
                     Some(last) => {
                         match last {
-                            Current::Object => {in_key = true;},
+                            Current::Object => {
+                                path.pop();
+                                in_key = true;
+                            },
                             Current::Array => {
                                 let last = path.len()-1;
                                 path[last].increment();
@@ -119,16 +157,25 @@ pub fn path(text: &str, offset: usize) -> Result<Vec<Index>, oxidized_json_check
     Ok(path)
 }
 
-/// Returns the path of the position in a human readable format usable by most JsonPath crates
+/// Constructs the path of an index in a raw json string. 
+/// Returns path in a human readable format usable by most JsonPath crates.
 ///
 /// # Examples
 /// 
 /// ```
 /// use json_position::{dot_path};
 ///
-/// let json = "[null, 9, {\"a\": \"b\"}]".to_owned();
-/// let path = dot_path(&json, json.find("b").unwrap()).expect("Invalid JSON");
+/// let json = "[null, 9, {\"a\": \"b\"}]";
+/// 
+/// let path = dot_path(json, json.find("b").unwrap()).expect("Invalid JSON");
 /// assert_eq!(path, "$.2.a");
+/// ```
+/// 
+/// # Errors
+/// 
+/// Returns [`oxidized_json_checker::Error`] if the input json is invalid.
+/// 
+/// [`oxidized_json_checker::Error`]: https://docs.rs/oxidized-json-checker/0.3.2/oxidized_json_checker/enum.Error.html
 pub fn dot_path(text: &str, offset: usize) -> Result<String, oxidized_json_checker::Error> {
     let p = path(text, offset)?;
     Ok(dots(&p))
@@ -154,12 +201,17 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let json = "[null, 9, {\"a\": \"b\"}]".to_owned();
+        let json = "[null, 9, {\"field1\": \"b\", \"field2\": [null, null, 87, 4], \"field3\": \"file.txt\"}]";
+        
+        // Tests regular path
+        let vec_path = path(json, json.find("87").unwrap()).expect("Invalid JSON");
+        assert_eq!(vec_path, vec![Index::Array(2), Index::Object(String::from("field2")), Index::Array(2)]);
 
-        let dotted = dot_path(&json, json.find("b").unwrap()).expect("Invalid JSON");
-        assert_eq!(dotted, "$.2.a");
+        // Tests dotted path
+        let dotted = dot_path(json, json.find("87").unwrap()).expect("Invalid JSON");
+        assert_eq!(dotted, "$.2.field2.2");
 
-        let vec_path = path(&json, json.find("b").unwrap()).expect("Invalid JSON");
-        assert_eq!(vec_path, vec![Index::Array(2), Index::Object("a".to_owned())]);
+        // Tests out of bounds 
+        assert_eq!(path(json, 1000).unwrap(), vec![]);
     }
 }
