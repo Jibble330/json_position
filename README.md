@@ -12,6 +12,7 @@ let json = r#"[9, {"name": "b", "fields": [null, null, 87, 4], "path": "file.txt
 let position = json.find("87").unwrap();
 
 let vec_path = path(json, position).expect("Invalid JSON");
+assert_eq!(vec_path, [Array(1), Object("fields".to_string()), Array(2)])
 
 let dotted = dot_path(json, position).expect("Invalid JSON");
 assert_eq!(dotted, "$.1.fields.2");
