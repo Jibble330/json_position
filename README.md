@@ -21,5 +21,7 @@ assert_eq!(dotted, "$.1.fields.2");
 In this example we start with the raw JSON string `[9, {"name": "b", "fields": [null, null, 87, 4]}]`</br>
 We are trying to find the path to the first `87` contained in the string, which starts at char 42.
 This can be indexed to with the path `json[1]["fields"][2]`
+
 The `path` function returns this path in a `Vec<Index>`. `Index` is an `enum` with two varients. One is `Array`, which is an index into an array, and `Object` which is a key in an object.
+
 The `dot_path` function returns this path in a format used by most JsonPath libraries: `"$.1.fields.2"`
