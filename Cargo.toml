@@ -1,9 +1,16 @@
 [package]
-name = "json_position"
+name = "jsonposition"
 version = "0.1.0"
 edition = "2021"
+authors = ["Kestrel"]
+keywords = ["json", "position", "cursor", "path"]
+categories = ["algorithms", "text-processing"]
+description = "Finds a path to a JSON element at a provided string index"
+repository = "https://github.com/commonkestrel/jsonposition"
+documentation = "https://docs.rs/jsonposition"
+readme = "README.md"
+license = "MIT"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 oxidized-json-checker = "0.3.2"

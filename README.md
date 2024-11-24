@@ -6,7 +6,7 @@ Similar to extensions in most IDEs to get path to cursor position.
 ## Examples
 
 ```rust
-use json_position::{ path, dot_path, Index };
+use jsonposition::{ path, dot_path, Index };
 
 let json = r#"[9, {"name": "b", "fields": [null, null, 87, 4], "path": "file.txt"}]"#;
 let position = json.find("87").unwrap();

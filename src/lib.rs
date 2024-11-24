@@ -4,7 +4,7 @@
 //! # Examples
 //! 
 //! ```
-//! use json_position::dot_path;
+//! use jsonposition::dot_path;
 //! 
 //! let json = r#"[9, {"name": "b", "fields": [null, null, 87, 4], "path": "file.txt"}]"#;
 //! let position = json.find("87").unwrap();
@@ -70,7 +70,7 @@ fn substring(str: &Vec<char>, start: usize, end: usize) -> String {
 /// # Examples
 /// 
 /// ```
-/// use json_position::{path, Index};
+/// use jsonposition::{path, Index};
 /// 
 /// let json = r#"[null, 9, {"a": "b"}]"#;
 /// 
@@ -163,7 +163,7 @@ pub fn path(text: &str, offset: usize) -> Result<Vec<Index>, oxidized_json_check
 /// # Examples
 /// 
 /// ```
-/// use json_position::{dot_path};
+/// use jsonposition::{dot_path};
 ///
 /// let json = r#"[null, 9, {"a": "b"}]"#;
 /// 
